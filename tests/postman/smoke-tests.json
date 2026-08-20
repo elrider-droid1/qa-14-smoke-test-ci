@@ -1,0 +1,497 @@
+{
+  "info": {
+    "name": "QA-14 Fintech API - Smoke Tests",
+    "description": "Automated smoke test collection for the 3MTT QA-14 Smoke Test in CI capstone project.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "ST-001 - API Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-001: HTTP status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-001: API status is ok', function () {",
+              "    pm.expect(json.status).to.eql('ok');",
+              "});",
+              "",
+              "pm.test('ST-001: Service name is correct', function () {",
+              "    pm.expect(json.service).to.eql('QA-14 Fintech API');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ST-002 - Valid Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-002: HTTP status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-002: Login is successful', function () {",
+              "    pm.expect(json.success).to.eql(true);",
+              "});",
+              "",
+              "pm.test('ST-002: Authentication token exists', function () {",
+              "    pm.expect(json.token).to.be.a('string').and.not.empty;",
+              "});",
+              "",
+              "pm.test('ST-002: Correct user email returned', function () {",
+              "    pm.expect(json.user.email).to.eql('testuser@example.com');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ST-003 - Invalid Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"WrongPassword123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-003: HTTP status is 401', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-003: Login is rejected', function () {",
+              "    pm.expect(json.success).to.eql(false);",
+              "});",
+              "",
+              "pm.test('ST-003: Error message is correct', function () {",
+              "    pm.expect(json.message).to.eql('Invalid email or password');",
+              "});",
+              "",
+              "pm.test('ST-003: No authentication token returned', function () {",
+              "    pm.expect(json.token).to.be.undefined;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ST-004 - Wallet Balance",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/wallet/balance",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "balance"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-004: HTTP status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-004: Request is successful', function () {",
+              "    pm.expect(json.success).to.eql(true);",
+              "});",
+              "",
+              "pm.test('ST-004: Currency is NGN', function () {",
+              "    pm.expect(json.currency).to.eql('NGN');",
+              "});",
+              "",
+              "pm.test('ST-004: Balance is numeric', function () {",
+              "    pm.expect(json.balance).to.be.a('number');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ST-005 - Transactions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "transactions"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-005: HTTP status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-005: Request is successful', function () {",
+              "    pm.expect(json.success).to.eql(true);",
+              "});",
+              "",
+              "pm.test('ST-005: Transactions is an array', function () {",
+              "    pm.expect(json.transactions).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('ST-005: At least one transaction exists', function () {",
+              "    pm.expect(json.transactions.length).to.be.greaterThan(0);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ST-006 - Fund Wallet",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 1000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallet/fund",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "fund"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-006: HTTP status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-006: Funding is successful', function () {",
+              "    pm.expect(json.success).to.eql(true);",
+              "});",
+              "",
+              "pm.test('ST-006: Funding amount is 1000', function () {",
+              "    pm.expect(json.amount).to.eql(1000);",
+              "});",
+              "",
+              "pm.test('ST-006: New balance is returned', function () {",
+              "    pm.expect(json.newBalance).to.be.a('number');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ST-007 - Transfer Money",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 5000\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallet/transfer",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "transfer"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-007: HTTP status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-007: Transfer is successful', function () {",
+              "    pm.expect(json.success).to.eql(true);",
+              "});",
+              "",
+              "pm.test('ST-007: Transfer amount is 5000', function () {",
+              "    pm.expect(json.amount).to.eql(5000);",
+              "});",
+              "",
+              "pm.test('ST-007: New balance is returned', function () {",
+              "    pm.expect(json.newBalance).to.be.a('number');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ST-008 - Invalid Funding",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 0\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallet/fund",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "fund"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-008: HTTP status is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-008: Funding is rejected', function () {",
+              "    pm.expect(json.success).to.eql(false);",
+              "});",
+              "",
+              "pm.test('ST-008: Correct validation message', function () {",
+              "    pm.expect(json.message).to.eql('Amount must be greater than zero');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ST-009 - Insufficient Balance",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 999999999\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/wallet/transfer",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "transfer"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-009: HTTP status is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-009: Transfer is rejected', function () {",
+              "    pm.expect(json.success).to.eql(false);",
+              "});",
+              "",
+              "pm.test('ST-009: Insufficient balance message is returned', function () {",
+              "    pm.expect(json.message).to.eql('Insufficient wallet balance');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ST-010 - Unknown Endpoint",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/unknown-endpoint",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "unknown-endpoint"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ST-010: HTTP status is 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('ST-010: Request is rejected', function () {",
+              "    pm.expect(json.success).to.eql(false);",
+              "});",
+              "",
+              "pm.test('ST-010: Route not found message is returned', function () {",
+              "    pm.expect(json.message).to.eql('Route not found');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}

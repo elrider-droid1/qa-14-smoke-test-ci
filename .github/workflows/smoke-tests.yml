@@ -1,0 +1,83 @@
+name: QA-14 Smoke Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+  workflow_dispatch:
+
+jobs:
+  smoke-tests:
+    name: Run Automated Smoke Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start API server
+        run: |
+          nohup npm start > api-server.log 2>&1 &
+          echo $! > api-server.pid
+
+      - name: Wait for API to become available
+        run: |
+          echo "Waiting for QA-14 Fintech API..."
+
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/health > /dev/null; then
+              echo "API is ready."
+              exit 0
+            fi
+
+            echo "Attempt $i/30: API is not ready yet..."
+            sleep 2
+          done
+
+          echo "API failed to become available."
+          echo "===== API SERVER LOG ====="
+          cat api-server.log
+          exit 1
+
+      - name: Run Newman smoke tests
+        run: npm run test:smoke
+
+      - name: Upload API server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-server-log
+          path: api-server.log
+          if-no-files-found: ignore
+
+      - name: Upload Newman report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: |
+            reports/
+          if-no-files-found: ignore
+
+      - name: Stop API server
+        if: always()
+        run: |
+          if [ -f api-server.pid ]; then
+            kill "$(cat api-server.pid)" || true
+          fi

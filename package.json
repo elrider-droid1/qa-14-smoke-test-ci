@@ -1,0 +1,17 @@
+{
+  "name": "qa-14-smoke-test-ci",
+  "version": "1.0.0",
+  "description": "3MTT QA-14 Smoke Test in CI Capstone Project",
+  "main": "application/src/server.js",
+  "scripts": {
+    "start": "node application/src/server.js",
+    "dev": "node application/src/server.js",
+    "test:smoke": "newman run tests/postman/smoke-tests.json"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1"
+  }
+}
